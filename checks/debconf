@@ -35,6 +35,7 @@ map { $template_fields{$_}=1 } qw(template type choices default description);
 my %valid_types;
 map { $valid_types{$_}=1 } qw(string boolean select multiselect
 	                      note text password);
+$valid_types{error} = 1 if $type eq 'udeb';
 
 my $seenconfig='';
 my $seentemplates='';
@@ -53,7 +54,7 @@ exit unless $seenconfig or $seentemplates;
 # Check that both debconf control area files are present.
 if ($seenconfig and not $seentemplates) {
     print "W: $pkg $type: no-debconf-templates\n";
-} elsif ($seentemplates and not $seenconfig) {
+} elsif ($seentemplates and not $seenconfig and $type ne 'udeb') {
     print "W: $pkg $type: no-debconf-config\n";
 }
 
@@ -140,13 +141,19 @@ for my $field (qw(depends pre-depends)) {
     if (-f "fields/$field") {
 	open(IN, "fields/$field") or fail("Can't open fields/$field: $!");
 	chomp($_ = <IN>);
-	$_ =~ s/debconf-2\.0/debconf (>= 1.2.30)/go;
 	$_ .= ", $version" if defined $version;
-	push @alldeps, $_;
+	$_ =~ s/debconf-2\.0/debconf (>= 1.2.30)/go;
+	$_ =~ s/cdebconf(-\w+)?(-udeb)?\s*(\(.+?\))?/debconf (>= 1.2.30)/g;
+	$_ =~ s/libdebconfclient.?(-udeb)?\s*(\(.+?\))?/debconf (>= 1.2.30)/g;
+        push @alldeps, $_;
 	$dependencies{$field} = Dep::parse($_);
     } else {
-	push @alldeps, $version;
-	$dependencies{$field} = Dep::parse($version);
+	my $dep = $version;
+	$dep =~ s/debconf-2\.0/debconf (>= 1.2.30)/go;
+	$dep =~ s/cdebconf(-\w+)?(-udeb)?\s*(\(.+?\))?/debconf (>= 1.2.30)/g;
+	$dep =~ s/libdebconfclient.?(-udeb)?\s*(\(.+?\))?/debconf (>= 1.2.30)/g;
+	push @alldeps, $dep;
+	$dependencies{$field} = Dep::parse($dep);
     }
 }
 
@@ -174,6 +181,9 @@ for my $file (qw(config postinst)) {
 	my $isdefault='';
 	my $usesseen='';
 
+	my $fl = <IN>;
+	next if $fl !~ /^#!/; # skip, if not a script
+
 	while (<IN>) {
 	    s/#.*//;    # Not perfect for Perl, but should be OK
 	    next unless m/\S/;
@@ -190,7 +200,8 @@ for my $file (qw(config postinst)) {
 	    }
 	    if ($file eq 'postinst' and not $db_input and m/db_input/) {
 	        # TODO: Perl?
-	        print "W: $pkg $type: postinst-uses-db-input\n";
+	        print "W: $pkg $type: postinst-uses-db-input\n"
+		    if $type ne 'udeb';
 	        $db_input=1;
 	    }
 	    if (not $isdefault and m/db_fset.*isdefault/) {
@@ -255,7 +266,7 @@ if ($usesmultiselect) {
 # the following checks is ignored if the package being checked is debconf
 # itself.
 
-exit 0 if $pkg eq "debconf";
+exit 0 if ($pkg eq "debconf") || ($type eq 'udeb');
 
 open(SCRIPTS, "scripts") or fail("cannot open lintian scripts file: $!");
 while (<SCRIPTS>) {

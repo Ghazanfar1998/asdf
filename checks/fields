@@ -134,10 +134,10 @@ if (open(IN, "fields/subarchitecture")) {
 
 if (open(IN, "fields/installer-menu-item")) {
     chop($_ = <IN>);
-    my @subarchs = split;
+    /^\d+$/ || tag_error("bad-menu-item");
     close(IN);
 
-    single_line('subarchitecture', $_);
+    single_line('installer-menu-item', $_);
 }
 
 if (not open(IN, "fields/maintainer")) {

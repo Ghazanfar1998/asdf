@@ -103,11 +103,11 @@ while (<IN>) {
 	    print "E: $pkg $type: config-file-reserved $file by libpam-runtime\n";
 	}
 	# ---------------- /etc/rc.d
-	elsif ($file =~ m,^etc/rc\.d/\S, and $pkg !~ /^(sysvinit|file-rc)$/) {
+	elsif ($type ne 'udeb' and $file =~ m,^etc/rc\.d/\S, and $pkg !~ /^(sysvinit|file-rc)$/) {
 	    print "E: $pkg $type: package-installs-into-etc-rc.d $file\n";
 	}
 	# ---------------- /etc/rc?.d
-	elsif ($file =~ m,^etc/rc(\d|S)\.d/\S, and $pkg !~ /^(sysvinit|file-rc)$/) {
+	elsif ($type ne 'udeb' and $file =~ m,^etc/rc(\d|S)\.d/\S, and $pkg !~ /^(sysvinit|file-rc)$/) {
 	    print "E: $pkg $type: package-installs-into-etc-rc.d $file\n";
 	}
 	# ---------------- /etc/rc.boot
@@ -134,7 +134,7 @@ while (<IN>) {
 	# ---------------- /usr/share/doc
 	if ($file =~ m,^usr/share/doc/\S,) {
 	    if ($type eq 'udeb') {
-		print "E: $pkg $type: file-in-usr-share-doc $file\n";
+		print "E: $pkg $type: documentation-file $file\n";
 	    } else {
 		# file not owned by root?
 		if ($owner ne 'root/root') {
@@ -221,8 +221,17 @@ while (<IN>) {
 	}
 	# ---------------- /usr/share/man and /usr/X11R6/man
 	elsif ($file =~ m,^usr/X11R6/man/\S+, or m,^usr/share/man/\S+, ) {
+	    if ($type eq 'udeb') {
+		print "E: $pkg $type: documentation-file $file\n";
+	    }
 	    if ($perm =~ m/^-.*[xt]/) {
 		print "E: $pkg $type: executable-manpage $file\n";
+	    }
+	}
+	# ---------------- /usr/share/info
+	elsif ($file =~ m,^usr/share/info\S+,) {
+	    if ($type eq 'udeb') {
+		print "E: $pkg $type: documentation-file $file\n";
 	    }
 	}
 	# ---------------- /usr/share
@@ -292,7 +301,9 @@ while (<IN>) {
 	# base system.  (Specifically, /cdrom, /floppy, /initrd, and /proc
 	# are not mentioned in the FHS).
 	print "E: $pkg $type: non-standard-toplevel-dir $file\n"
-	    unless $pkg eq 'base-files' or $pkg eq 'hurd';
+	    unless $pkg eq 'base-files' 
+	    or $pkg eq 'hurd' 
+	    or $pkg =~ /^rootskel(-bootfloppy)?/;
     }
 
     # ---------------- compatibility symlinks should not be used
