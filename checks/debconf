@@ -201,7 +201,7 @@ for my $file (qw(config postinst)) {
 	    if ($file eq 'postinst' and not $db_input and m/db_input/) {
 	        # TODO: Perl?
 	        print "W: $pkg $type: postinst-uses-db-input\n"
-		    if $type ne 'udeb';
+		    unless $type eq 'udeb';
 	        $db_input=1;
 	    }
 	    if (not $isdefault and m/db_fset.*isdefault/) {
@@ -212,14 +212,16 @@ for my $file (qw(config postinst)) {
 	    if (not $usesseen and m/db_f[sg]et\s+\S+\s+seen\s+/) {
 	       unless (Dep::implies($alldependencies,
 	                 Dep::parse('debconf (>= 0.5)'))) {
-	           print "E: $pkg $type: seen-flag-requires-versioned-depends $file\n";
+	           print "E: $pkg $type: seen-flag-requires-versioned-depends $file\n" 
+		       unless $type eq 'udeb';
 	       }
 	        $usesseen = 1;
 	    }
 	}
 
 	unless ($usesconfmodule) {
-	    print "W: $pkg $type: $file-does-not-load-confmodule\n";
+	    print "W: $pkg $type: $file-does-not-load-confmodule\n" 
+		unless $type eq 'udeb';
 	}
 
 	close IN;
@@ -246,13 +248,15 @@ if (open(POSTRM, "control/postrm")) {
 if ($usesmultiselect) {
     unless (Dep::implies($alldependencies,
 	                 Dep::parse('debconf (>= 0.2.26)'))) {
-	print "W: $pkg $type: multiselect-without-dependency\n";
+	print "W: $pkg $type: multiselect-without-dependency\n"
+	    unless $type eq 'udeb';
     }
 } elsif ($usespreinst) {
     unless (Dep::implies($dependencies{'pre-depends'},
 	                 Dep::parse('debconf (>= 0.2.17)'))
 	    or Dep::implies($dependencies{'depends'}, Dep::parse('debconf'))) {
-	print "W: $pkg $type: missing-debconf-dependency-for-preinst\n";
+	print "W: $pkg $type: missing-debconf-dependency-for-preinst\n"
+	    unless $type eq 'udeb';
     }
 } else {
     unless (Dep::implies($alldependencies, Dep::parse('debconf'))) {

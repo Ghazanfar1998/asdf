@@ -51,6 +51,7 @@ my %ctrl_udeb =
     );
 
 my %ctrl = $type eq 'udeb' ? %ctrl_udeb : %ctrl_deb;
+my %ctrl_alt = $type eq 'udeb' ? %ctrl_deb : %ctrl_udeb;
 
 # process control-index file
 open(IN,"control-index") or fail("cannot open control-index file: $!");
@@ -70,8 +71,13 @@ while (<IN>) {
 
     # valid control file?
     unless ( exists $ctrl{$file} ) {
-	print "E: $pkg $type: unknown-control-file $file\n";
-	next;
+	if ( exists $ctrl_alt{$file} ) {
+	    print "E: $pkg $type: not-allowed-control-file $file\n";
+	    next;
+	} else {
+	    print "E: $pkg $type: unknown-control-file $file\n";
+	    next;
+	}
     }
 
     # skip `control' control file (that's an exception: dpkg doesn't care and

@@ -321,8 +321,7 @@ if (($type eq 'binary') || ($type eq 'udeb')) {
 	    my $versioned;
 
 	    if ($#alternates >= 1) {
-		if ( ($type eq 'udeb') || 
-		     ($fld ne 'depends' and $fld ne 'recommends' and
+		if ( ($fld ne 'depends' and $fld ne 'recommends' and
 		    $fld ne 'suggests' and $fld ne 'pre-depends')) {
 		    tag_error("alternates-not-allowed", "$fld:", $conj);
 		}

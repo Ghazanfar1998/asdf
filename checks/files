@@ -207,7 +207,7 @@ while (<IN>) {
 	}
 	# ---------------- /usr/lib -- needs to go after the other usr/lib/*
 	elsif ($file =~ m,^usr/lib/,) {
-	    if ($file =~ m,\.(gif|jpeg|jpg|png|tiff|xpm|xbm)$, and not defined $link) {
+	    if ($type ne 'udeb' and $file =~ m,\.(gif|jpeg|jpg|png|tiff|xpm|xbm)$, and not defined $link) {
 		print "W: $pkg $type: image-file-in-usr-lib $file\n"
 	    }
 	}
@@ -241,7 +241,7 @@ while (<IN>) {
 	    }
 	}
 	# ---------------- /usr subdirs
-	elsif ($file =~ m,^usr/[^/]+/$, ) { # FSSTND dirs
+	elsif ($type ne 'udeb' and $file =~ m,^usr/[^/]+/$, ) { # FSSTND dirs
 	    if ( $file =~ m,^usr/(dict|doc|etc|info|man|adm|preserve)/,) {
 		print "E: $pkg $type: FSSTND-dir-in-usr $file\n";
 	    }
@@ -259,7 +259,7 @@ while (<IN>) {
 	}
     }
     # ---------------- /var subdirs
-    elsif ($file =~ m,^var/[^/]+/$,) { # FSSTND dirs
+    elsif ($type ne 'udeb' and $file =~ m,^var/[^/]+/$,) { # FSSTND dirs
 	if ( $file =~ m,^var/(adm|catman|named|nis|preserve)/, ) {
 	    print "W: $pkg $type: FSSTND-dir-in-var $file\n";
 	}
@@ -268,7 +268,7 @@ while (<IN>) {
 	    print "E: $pkg $type: non-standard-dir-in-var $file\n";
 	}
     }
-    elsif ($file =~ m,^var/lib/games/.,) {
+    elsif ($type ne 'udeb' and $file =~ m,^var/lib/games/.,) {
 	print "E: $pkg $type: non-standard-dir-in-var $file\n";
     }
     # ---------------- /opt
@@ -315,7 +315,8 @@ while (<IN>) {
 
     # ---------------- any files
     if ($perm !~ m/^d/) {
-	unless ($file =~ m,^usr/(bin|dict|doc|games|include|info|lib|man|sbin|share|src|X11R6)/, or
+	unless ($type eq 'udeb' or
+		$file =~ m,^usr/(bin|dict|doc|games|include|info|lib|man|sbin|share|src|X11R6)/, or
 		$file =~ m,^lib/(modules/|libc5-compat/)?, or
 		$file =~ m,^var/(games|lib|www|named)/, or
 		$file =~ m,^(bin|boot|dev|etc|sbin)/, or
@@ -503,7 +504,7 @@ while (<IN>) {
 	    $link =~ m,^/?([^/]+),;
 	    my $linktop = $1;
 
-	    if ($filetop eq $linktop) {
+	    if ($type ne 'udeb' and $filetop eq $linktop) {
 		# absolute links within one toplevel directory are _not_ ok!
 		print "E: $pkg $type: symlink-should-be-relative $file $link\n";
 	    }
@@ -536,7 +537,7 @@ while (<IN>) {
 
 	    if ($#pathcomponents == -1) {
 		# we've reached the root directory
-		if ($filetop ne $linktop) {
+		if ($type ne 'udeb' and $filetop ne $linktop) {
 		    # relative link into other toplevel directory
 		    print "E: $pkg $type: symlink-should-be-absolute $file $link\n";
 		}

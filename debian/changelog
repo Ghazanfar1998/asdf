@@ -1,3 +1,10 @@
+lintian (1.22.11+udeb1) unstable; urgency=low
+
+  * Sync with final 1.22.11 version
+  * Remove many false positives noted by Joey Hess
+
+ -- Frank Lichtenheld <djpig@debian.org>  Thu,  4 Mar 2004 21:43:13 +0100
+
 lintian (1.22.11+udeb) unstable; urgency=low
 
   * Add support for udeb packages
