@@ -133,45 +133,49 @@ while (<IN>) {
     elsif ($file =~ m,^usr/,) {
 	# ---------------- /usr/share/doc
 	if ($file =~ m,^usr/share/doc/\S,) {
-	    # file not owned by root?
-	    if ($owner ne 'root/root') {
-		print "E: $pkg $type: bad-owner-for-doc-file $file $owner != root/root\n";
-	    }
-
-	    # file directly in /usr/share/doc ?
-	    if ($perm =~ m/^-/ and $file =~ m,^usr/share/doc/[^/]+$,) {
-		print "E: $pkg $type: file-directly-in-usr-share-doc $file\n";
-	    }
-
-	    # executable in /usr/share/doc ?
-	    if ($perm =~ m/^-.*[xs]/ and $file !~ m,^usr/share/doc/([^/]+/)?examples/,) {
-		if ($script{$file}) {
-		    print "I: $pkg $type: script-in-usr-share-doc $file\n";
-		} else {
-		    print "E: $pkg $type: executable-in-usr-share-doc $file " . (sprintf "%04o\n", $operm);
+	    if ($type eq 'udeb') {
+		print "E: $pkg $type: file-in-usr-share-doc $file\n";
+	    } else {
+		# file not owned by root?
+		if ($owner ne 'root/root') {
+		    print "E: $pkg $type: bad-owner-for-doc-file $file $owner != root/root\n";
 		}
-	    }
-
-	    # zero byte file in /usr/share/doc/
-	    if ($size == 0 and $perm =~ m,^-,) {
-		# exception: __init__.py files are empty tagging files (see
-		# bug #215234)
-		unless ($file =~ m,^usr/share/doc/([^/]+/)?examples/(.+/)?__init__\.py$,) {
-		    print "W: $pkg $type: zero-byte-file-in-doc-directory $file\n";
+		
+		# file directly in /usr/share/doc ?
+		if ($perm =~ m/^-/ and $file =~ m,^usr/share/doc/[^/]+$,) {
+		    print "E: $pkg $type: file-directly-in-usr-share-doc $file\n";
 		}
-	    }
+		
+		# executable in /usr/share/doc ?
+		if ($perm =~ m/^-.*[xs]/ and $file !~ m,^usr/share/doc/([^/]+/)?examples/,) {
+		    if ($script{$file}) {
+			print "I: $pkg $type: script-in-usr-share-doc $file\n";
+		    } else {
+			print "E: $pkg $type: executable-in-usr-share-doc $file " . (sprintf "%04o\n", $operm);
+		    }
+		}
+		
+		# zero byte file in /usr/share/doc/
+		if ($size == 0 and $perm =~ m,^-,) {
+		    # exception: __init__.py files are empty tagging files (see
+		    # bug #215234)
+		    unless ($file =~ m,^usr/share/doc/([^/]+/)?examples/(.+/)?__init__\.py$,) {
+			print "W: $pkg $type: zero-byte-file-in-doc-directory $file\n";
+		    }
+		}
 
-	    # override files have moved
-	    my $tmp = quotemeta($pkg);
-	    if ($file =~ m,^usr/share/doc/$tmp/override\.[lL]intian(\.gz)?$,) {
-		print "E: $pkg $type: override-file-in-wrong-location $file\n";
-	    } elsif ($file =~ m,^usr/share/lintian/overrides/$tmp/.*,) {
-		print "E: $pkg $type: override-file-in-wrong-location $file\n";
-	    }
-
-	    # contains an INSTALL file?
-	    if ($file =~ m,^usr/share/doc/$tmp/INSTALL(?:\..+)*$,) {
-		print "W: $pkg $type: package-contains-upstream-install-documentation $file\n";
+		# override files have moved
+		my $tmp = quotemeta($pkg);
+		if ($file =~ m,^usr/share/doc/$tmp/override\.[lL]intian(\.gz)?$,) {
+		    print "E: $pkg $type: override-file-in-wrong-location $file\n";
+		} elsif ($file =~ m,^usr/share/lintian/overrides/$tmp/.*,) {
+		    print "E: $pkg $type: override-file-in-wrong-location $file\n";
+		}
+		
+		# contains an INSTALL file?
+		if ($file =~ m,^usr/share/doc/$tmp/INSTALL(?:\..+)*$,) {
+		    print "W: $pkg $type: package-contains-upstream-install-documentation $file\n";
+		}
 	    }
 	}
 	# ---------------- /usr/doc

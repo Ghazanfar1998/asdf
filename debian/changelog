@@ -1,3 +1,9 @@
+lintian (1.22.11+udeb) unstable; urgency=low
+
+  * Add support for udeb packages
+
+ -- Frank Lichtenheld <djpig@debian.org>  Sun, 22 Feb 2004 12:13:04 +0100
+
 lintian (1.22.11) unstable; urgency=low
 
   Jeroen van Wolffelaar <jeroen@wolffelaar.nl>
