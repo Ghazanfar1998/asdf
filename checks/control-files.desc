@@ -2,7 +2,7 @@ Check-Script: control-files
 Author: Christian Schwarz <schwarz@debian.org>
 Abbrev: ctl
 Standards-Version: 3.2.0
-Type: binary
+Type: binary, udeb
 Unpack-Level: 1
 
 Tag: unknown-control-file

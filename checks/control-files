@@ -25,7 +25,7 @@ use strict;
 my $pkg = shift;
 my $type = shift;
 
-my %ctrl =
+my %ctrl_deb =
     (
      'config', 0755,
      'control', 0644,
@@ -38,6 +38,19 @@ my %ctrl =
      'shlibs', 0644,
      'templates', 0644,
     );
+
+my %ctrl_udeb =
+    (
+     'config', 0755,
+     'control', 0644,
+     'isinstallable', 0755,
+     'menutest', 0755,
+     'postinst', 0755,
+     'shlibs', 0644,
+     'templates', 0644,
+    );
+
+my %ctrl = $type eq 'udeb' ? %ctrl_udeb : %ctrl_deb;
 
 # process control-index file
 open(IN,"control-index") or fail("cannot open control-index file: $!");
@@ -56,7 +69,7 @@ while (<IN>) {
     next if $file eq './';
 
     # valid control file?
-    unless (exists $ctrl{$file}) {
+    unless ( exists $ctrl{$file} ) {
 	print "E: $pkg $type: unknown-control-file $file\n";
 	next;
     }
