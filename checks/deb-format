@@ -31,7 +31,7 @@ use constant BLOCK_SIZE     => sub { my $n = int($_[0]/512); $n++ if $_[0] % 512
 
 open INPUT, "ar p deb data.tar.gz | gzip -dc |";
 
-my ($chunk, $real_name, $data);
+my ($chunk, $real_name, $data, $oldraw, $raw);
 while( read( INPUT, $chunk, HEAD ) ) {                  
     ### if we can't read in all bytes... ###
     last if length $chunk != HEAD;
@@ -69,8 +69,10 @@ while( read( INPUT, $chunk, HEAD ) ) {
         ### throw away trailing garbage ###
         substr ($$data, $entry->size) = "";
     }
-    
-    
+
+    $oldraw = $raw;
+    $raw = $entry->raw();
+
     ### clean up of the entries.. posix tar /apparently/ has some
     ### weird 'feature' that allows for filenames > 255 characters
     ### they'll put a header in with as name '././@LongLink' and the
@@ -87,12 +89,12 @@ while( read( INPUT, $chunk, HEAD ) ) {
         undef $real_name;
     }
 
-	my $raw = $entry->raw();
 	my $name = substr($raw, 0, 100);
 	$name =~ s/\x00/-/g;
 
 	print "E: $pkg $type: deb-created-with-broken-tar broken file: /$name\n"
-		if ((length($name) == 100) && ($name eq $entry->name()));
+		if ((length($name) == 100) && ($name eq $entry->name()) &&
+			substr($oldraw, 0, 13) ne '././@LongLink');
     
     ### Guard against tarfiles with garbage at the end
     last if $entry->name eq ''; 
