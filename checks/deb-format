@@ -91,7 +91,7 @@ while( read( INPUT, $chunk, HEAD ) ) {
 	my $name = substr($raw, 0, 100);
 	$name =~ s/\x00/-/g;
 
-	print "E: deb-created-with-broken-tar broken file: $name\n"
+	print "E: $pkg $type: deb-created-with-broken-tar broken file: /$name\n"
 		if ((length($name) == 100) && ($name eq $entry->name()));
     
     ### Guard against tarfiles with garbage at the end
