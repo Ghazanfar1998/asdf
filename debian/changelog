@@ -1,6 +1,7 @@
 lintian (1.22.10) unstable; urgency=low
 
-  * Interim release
+  * Lintian maintainance is now in the hands of the `Debian Lintian
+    Maintainers' group
   * Add check for tar bug #230910
     (tar check written by Marc 'HE' Brockschmidt <marc@marcbrockschmidt.de>)
 
