@@ -204,7 +204,7 @@ sub record_unpack_info {
 }
 
 # Record what type of data is specified
-# Options: -b|--binary, -s|--source
+# Options: -b|--binary, -s|--source, --udeb
 sub record_pkgmode {
     $pkg_mode = 'b' if $_[0] eq 'binary';
     $pkg_mode = 's' if $_[0] eq 'source';
