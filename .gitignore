@@ -12,6 +12,7 @@
 /doc/help.tmp
 /doc/lintian.html/
 /doc/lintian.txt
+/doc/conf.py
 /l10n/
 /man/man*/
 /runtests
@@ -20,4 +21,5 @@
 /.nobackup
 *.rej
 cover_db*
+_build-*
 /coverage-report
